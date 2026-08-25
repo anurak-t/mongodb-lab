@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f8fafb" />
+    <title>MovieHub | Sign in</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="auth-page">
+    <header class="auth-topbar">
+      <a class="brand brand--large" href="/" aria-label="MovieHub home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M5 4.75h14v14.5H5z" />
+            <path d="m5 9 4-4m0 0 4 4m-4-4v14m6-14 4 4m-4-4v14" />
+          </svg>
+        </span>
+        <span>MovieHub</span>
+      </a>
+      <div class="auth-topbar__meta">
+        <span class="dataset-pill"><span class="status-dot status-dot--teal"></span>Catalog connected</span>
+        <span class="auth-topbar__secure">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5.5" y="10" width="13" height="10" rx="1.5" /><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" /></svg>
+          Secure access
+        </span>
+      </div>
+    </header>
+    <main class="auth-layout">
+      <section class="auth-aside" aria-label="MovieHub introduction">
+        <div class="auth-aside__content">
+          <p class="kicker">Movie catalog operations</p>
+          <h1>Keep every title, rating, and release detail in one place.</h1>
+          <p class="auth-aside__lede">Monitor catalog health, find films quickly, and keep movie records current.</p>
+
+          <div class="catalog-preview" aria-hidden="true">
+            <div class="catalog-preview__header"><strong>Catalog overview</strong><span><i class="status-dot status-dot--teal"></i>Connected</span></div>
+            <div class="catalog-preview__row"><span>Content</span><strong>Movies</strong></div>
+            <div class="catalog-preview__row"><span>Views</span><strong>Dashboard and catalog</strong></div>
+            <div class="catalog-preview__row"><span>Access</span><strong>Protected workspace</strong></div>
+          </div>
+        </div>
+
+        <p class="auth-trust">Your account and catalog access are protected by a signed session.</p>
+      </section>
+
+      <section class="auth-main">
+        <div class="auth-card">
+          <div class="auth-card__header">
+            <p class="kicker" id="auth-kicker">Welcome back</p>
+            <h2 id="auth-title">Sign in to continue</h2>
+            <p id="auth-description">Use your MovieHub account to manage the catalog.</p>
+          </div>
+
+          <div class="auth-tabs" role="tablist" aria-label="Authentication options">
+            <button class="auth-tab is-active" type="button" role="tab" aria-selected="true" data-auth-mode="login">Sign in</button>
+            <button class="auth-tab" type="button" role="tab" aria-selected="false" data-auth-mode="register">Create account</button>
+          </div>
+
+          <form id="auth-form" novalidate>
+            <div class="field-group is-hidden" id="name-field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" minlength="2" />
+              <p class="field-error" id="name-error"></p>
+            </div>
+
+            <div class="field-group">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required />
+              <p class="field-error" id="email-error"></p>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label-row">
+                <label for="password">Password</label>
+                <span class="field-hint" id="password-hint">At least 8 characters</span>
+              </div>
+              <div class="password-input">
+                <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" required />
+                <button class="icon-button" id="password-toggle" type="button" aria-label="Show password" title="Show password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                    <circle cx="12" cy="12" r="2.5" />
+                  </svg>
+                </button>
+              </div>
+              <p class="field-error" id="password-error"></p>
+            </div>
+
+            <p class="form-message" id="auth-message" aria-live="polite"></p>
+
+            <button class="button button--primary button--full" id="auth-submit" type="submit">Sign in</button>
+          </form>
+          <p class="auth-footnote" id="auth-footnote">New to MovieHub? <button class="text-button" type="button" data-auth-mode="register">Create an account</button></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/auth.js" defer></script>
+  </body>
+</html>
