@@ -15,8 +15,8 @@
 
 1. สร้าง MongoDB Atlas Account และสร้าง Free Cluster
 2. ติดตั้ง Database Client Extension ใน VS Code และสร้าง Connection ไปยัง Atlas
-4. เปิด `sample_mflix` แล้วตรวจสอบ Collection `movies`, `comments` และ `users`
-5. สร้าง Query ใหม่ใต้ Database `sample_mflix` และทดสอบคำสั่งต่อไปนี้
+3. เปิด `sample_mflix` แล้วตรวจสอบ Collection `movies`, `comments` และ `users`
+4. สร้าง Query ใหม่ใต้ Database `sample_mflix` และทดสอบคำสั่งต่อไปนี้
 
 ```javascript
 db("sample_mflix")
@@ -86,7 +86,130 @@ db("sample_mflix")
 
 ---
 
-## Lab 2 — Filter และ Logical Operators
+## Lab 2 — เพิ่ม แก้ไข และลบข้อมูลด้วย CRUD
+
+### วัตถุประสงค์
+
+- เพิ่ม Document ด้วย `insertOne()` และอ่านค่า `_id` ที่ MongoDB สร้างให้
+- แก้ไขเฉพาะ Field ที่ต้องการด้วย `updateOne()` และ `$set`
+- ลบ Document ที่ตรงกับ Filter ด้วย `deleteOne()`
+- อ่านค่าผลลัพธ์จากคำสั่งเขียน เช่น `insertedId`, `matchedCount`, `modifiedCount` และ `deletedCount`
+
+### เนื้อหาและ Syntax
+
+| การทำงาน | Syntax หลัก | ค่าที่ควรตรวจสอบ |
+|---|---|---|
+| เพิ่มหนึ่ง Document | `insertOne(document)` | `insertedId` |
+| เพิ่มหลาย Document | `insertMany([document, ...])` | `insertedIds` |
+| แก้ไขหนึ่ง Document | `updateOne(filter, update)` | `matchedCount`, `modifiedCount` |
+| แก้ไขหลาย Document | `updateMany(filter, update)` | `matchedCount`, `modifiedCount` |
+| ลบหนึ่ง Document | `deleteOne(filter)` | `deletedCount` |
+| ลบหลาย Document | `deleteMany(filter)` | `deletedCount` |
+
+### ขั้นตอนฝึกปฏิบัติ
+
+1. เพิ่ม Movie สำหรับการทดลองลงใน `movies`
+2. ตรวจสอบ `_id` จากผลลัพธ์ของ `insertOne()`
+3. แก้ไขปีและเพิ่ม Genre ของ Movie ที่เพิ่งเพิ่ม
+4. อ่าน Document หลังแก้ไขเพื่อตรวจสอบผลลัพธ์
+5. ลบ Movie ด้วย `labKey` แล้วตรวจสอบว่าไม่พบ Document อีก
+
+### ตัวอย่าง `insertOne()`
+
+กำหนด `labKey` เองเพื่อใช้เป็นตัวระบุที่อ่านง่ายและใช้ใน Filter ของคำสั่งถัดไป หากรันซ้ำ ให้เปลี่ยนค่า `labKey` หรือ ลบ Document เดิมก่อน
+
+```javascript
+db("sample_mflix")
+  .collection("mql_lab_movies")
+  .insertOne({
+    labKey: "mql-lab-crud-001",
+    title: "MQL CRUD Practice",
+    year: 2026,
+    genres: ["Learning"]
+  });
+// ดูผลลัพธ์ใน Result pane และตรวจสอบ insertedId
+```
+
+ถ้าต้องการเพิ่มหลาย Document ให้ใช้ `insertMany()` โดยส่ง Array ของ Document:
+
+```javascript
+db("sample_mflix")
+  .collection("mql_lab_movies")
+  .insertMany([
+    { labKey: "mql-lab-crud-002", title: "Second Practice", year: 2026 },
+    { labKey: "mql-lab-crud-003", title: "Third Practice", year: 2026 }
+  ]);
+```
+
+### ตัวอย่าง `updateOne()`
+
+`updateOne()` ต้องมี Filter และ Update Document โดยใช้ `$set` เพื่อแก้เฉพาะ Field ที่ระบุ ไม่เขียนทับทั้ง Document
+
+```javascript
+db("sample_mflix")
+  .collection("mql_lab_movies")
+  .updateOne(
+    { labKey: "mql-lab-crud-001" },
+    {
+      $set: {
+        year: 2027,
+        status: "updated"
+      },
+      $addToSet: {
+        genres: "MongoDB"
+      }
+    }
+  );
+// ดูผลลัพธ์ใน Result pane และตรวจสอบ matchedCount กับ modifiedCount
+```
+
+จากนั้นอ่านข้อมูลหลังแก้ไขด้วย `findOne()`:
+
+```javascript
+db("sample_mflix")
+  .collection("mql_lab_movies")
+  .findOne({ labKey: "mql-lab-crud-001" });
+```
+
+`matchedCount` คือจำนวน Document ที่ตรงกับ Filter ส่วน `modifiedCount` คือจำนวน Document ที่ถูกเปลี่ยนจริง หากค่าเดิมเหมือนค่าที่ส่งไป `matchedCount` อาจเป็น `1` แต่ `modifiedCount` เป็น `0`
+
+### ตัวอย่าง `deleteOne()`
+
+```javascript
+db("sample_mflix")
+  .collection("mql_lab_movies")
+  .deleteOne({ labKey: "mql-lab-crud-001" });
+// ดูผลลัพธ์ใน Result pane และตรวจสอบ deletedCount === 1
+```
+
+ตรวจสอบว่าลบสำเร็จด้วยการค้นหาอีกครั้ง:
+
+```javascript
+db("sample_mflix")
+  .collection("mql_lab_movies")
+  .findOne({ labKey: "mql-lab-crud-001" });
+// ผลลัพธ์ควรเป็น null
+```
+
+### สรุปผลลัพธ์ของคำสั่งเขียน
+
+| ค่าผลลัพธ์ | ความหมาย |
+|---|---|
+| `insertedId` | `_id` ของ Document ที่เพิ่มสำเร็จด้วย `insertOne()` |
+| `insertedIds` | Object ที่เก็บ `_id` ของแต่ละ Document จาก `insertMany()` |
+| `matchedCount` | จำนวน Document ที่ตรงกับ Filter ของ Update |
+| `modifiedCount` | จำนวน Document ที่ถูกแก้ไขจริง |
+| `deletedCount` | จำนวน Document ที่ถูกลบจริง |
+
+### Challenge
+
+- เพิ่ม Document อีก 2 รายการ แล้วค้นหาด้วย `find({ labKey: { $regex: "^mql-lab" } })`
+- แก้ไขเฉพาะรายการที่มี `year: 2026` ด้วย `updateMany()` และเพิ่ม Field `status: "reviewed"`
+- ลบเฉพาะ Document ที่สร้างจาก Lab นี้ แล้วตรวจสอบจำนวนผลลัพธ์ด้วย `countDocuments()`
+
+---
+
+## Lab 3 — Filter และ Logical Operators
 
 ### วัตถุประสงค์
 
@@ -201,7 +324,7 @@ db("sample_mflix")
 
 ---
 
-## Lab 3 — Query Nested Document, Array และ String
+## Lab 4 — Query Nested Document, Array และ String
 
 ### วัตถุประสงค์
 
@@ -242,7 +365,7 @@ Document ของภาพยนตร์มีโครงสร้างซ�
 | `$size` | Array มีจำนวนสมาชิกเท่ากับที่กำหนดพอดี | `{ genres: { $size: 2 } }` |
 | `$type` | ตรวจชนิดข้อมูลของ Field | `{ genres: { $type: "array" } }` |
 
-> `$size` ตรวจได้เฉพาะจำนวนที่ “เท่ากับ” เท่านั้น หากต้องการเปรียบเทียบจำนวนสมาชิก เช่น มากกว่า 2 ค่า จะใช้ `$expr` ร่วมกับ `$size` ซึ่งอยู่ใน Lab 5
+> `$size` ตรวจได้เฉพาะจำนวนที่ “เท่ากับ” เท่านั้น หากต้องการเปรียบเทียบจำนวนสมาชิก เช่น มากกว่า 2 ค่า จะใช้ `$expr` ร่วมกับ `$size` ซึ่งอยู่ใน Lab 6
 
 ### คู่มือการใช้ `$regex` และ `$options`
 
@@ -319,7 +442,7 @@ db("sample_mflix")
 
 ---
 
-## Lab 4 — Projection, Sort และ Pagination
+## Lab 5 — Projection, Sort และ Pagination
 
 ### วัตถุประสงค์
 
@@ -398,7 +521,7 @@ db("sample_mflix")
 
 ---
 
-## Lab 5 — Aggregation Pipeline เพื่อวิเคราะห์ข้อมูลภาพยนตร์
+## Lab 6 — Aggregation Pipeline เพื่อวิเคราะห์ข้อมูลภาพยนตร์
 
 ### วัตถุประสงค์
 
@@ -703,7 +826,7 @@ db("sample_mflix")
 
 ---
 
-## Lab 6 — Challenge: Movie Analytics
+## Lab 7 — Challenge: Movie Analytics
 
 ### วัตถุประสงค์
 
